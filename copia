@@ -1,0 +1,22 @@
+from GUI import GUI
+from HAL import HAL
+# Enter sequential code!
+
+VICTIMS_X = 30
+VICTIMS_Y = -40
+BOAT_X = 0
+BOAT_Y = 0 
+
+X_VEL = 0.25
+ANGLE = 0.6
+ITERATIONS = -40
+SPIRAL_ITERATIONS = 300
+LANDING_MARGIN = 0.07
+
+X_POS = HAL.get_position()[0]
+Y_POS = HAL.get_position()[1]
+
+HAL.takeoff(3)
+
+while not ((VICTIMS_X-1 < X_POS) and (X_POS < VICTIMS_X+1) and (VICTIMS_Y-1 < Y_POS) and (Y_POS < VICTIMS_Y+1)
+  GUI.showImage
