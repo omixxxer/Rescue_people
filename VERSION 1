@@ -1,0 +1,67 @@
+from GUI import GUI
+from HAL import HAL
+import cv2
+import math
+import rospy
+
+# Constantes
+FACES_TO_DETECT = 6
+HEIGHT = 4
+X_COORD = 25
+Y_COORD = 25
+MIN_EUCLIDEAN_DIST = 1.5
+
+# Variables
+detected_faces = []
+it = 0
+
+# Create a cascade classifier for face detection
+cascade_classifier = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
+
+# Función para detectar caras
+def detect_faces():
+    global detected_faces  # Make sure to use the global variable
+    # Obtener la imagen de la cámara
+    image = cv2.imread("image.jpg")
+
+    # Detectar las caras en la imagen
+    faces = cascade_classifier.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    # Limpiar la lista de caras detectadas antes de agregar nuevas caras
+    detected_faces.clear()
+
+    # Agregar las caras detectadas a la lista
+    for face in faces:
+        detected_faces.append(face)
+
+# Función para mover el robot en espiral
+def movement():
+    global it  # Make sure to use the global variable
+    # Calcular la coordenada X en la espiral
+    x_coord = math.pow(it, 0.2) * X_COORD
+
+    # Calcular la coordenada Y en la espiral
+    y_coord = math.pow(it, 0.2) * Y_COORD
+
+    # Enviar los comandos al robot
+    HAL.set_cmd_vel(x_coord, y_coord, HEIGHT, math.pi)
+
+    # Dormir el robot durante un tiempo
+    rospy.sleep(0.03)
+
+    # Aumentar el valor de it
+    it += 1
+
+# Bucle principal
+while True:
+    # Detectar caras
+    detect_faces()
+
+    # Si se detectan dos caras
+    if len(detected_faces) == FACES_TO_DETECT:
+        # Mover el robot en espiral
+        movement()
+
+    # Dormir el robot durante un tiempo
+    rospy.sleep(0.25)  # Reduced the sleep duration for testing purposes
