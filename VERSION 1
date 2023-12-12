@@ -7,7 +7,7 @@ import rospy
 # Constantes
 FACES_TO_DETECT = 6
 HEIGHT = 4
-X_COORD = 25
+X_COORD = 35
 Y_COORD = 25
 MIN_EUCLIDEAN_DIST = 1.5
 
