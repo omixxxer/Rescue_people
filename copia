@@ -1,22 +1,45 @@
 from GUI import GUI
 from HAL import HAL
-# Enter sequential code!
 
+# Constantes
 VICTIMS_X = 30
 VICTIMS_Y = -40
 BOAT_X = 0
-BOAT_Y = 0 
+BOAT_Y = 0
 
-X_VEL = 0.25
-ANGLE = 0.6
-ITERATIONS = -40
-SPIRAL_ITERATIONS = 300
-LANDING_MARGIN = 0.07
+# Variables
+x_vel = 0.25
+angle = 0.6
+iterations = 0
+spiral_iterations = 300
+landing_margin = 0.07
 
-X_POS = HAL.get_position()[0]
-Y_POS = HAL.get_position()[1]
+# Inicio
+x_pos = HAL.get_position()[0]
+y_pos = HAL.get_position()[1]
 
+# Despegue
 HAL.takeoff(3)
 
-while not ((VICTIMS_X-1 < X_POS) and (X_POS < VICTIMS_X+1) and (VICTIMS_Y-1 < Y_POS) and (Y_POS < VICTIMS_Y+1)
-  GUI.showImage
+# Bucle principal
+while not((VICTIMS_X - 1 <= x_pos <= VICTIMS_X + 1) and
+          (VICTIMS_Y - 1 <= y_pos <= VICTIMS_Y + 1)):
+
+    # Muestra las imágenes frontal y ventral
+    GUI.showImage(HAL.get_frontal_image())
+    GUI.showLeftImage(HAL.get_ventral_image())
+
+    # Actualiza la posición del barco
+    x_pos = HAL.get_position()[0]
+    y_pos = HAL.get_position()[1]
+
+    # Setea la posición del comando
+    HAL.set_cmd_pos(VICTIMS_X, VICTIMS_Y, 3, angle)
+    # time.sleep(0.01)
+
+# Bucle iterativo
+while True:
+
+    # Muestra las imágenes frontal y ventral
+    GUI.showImage(HAL.get_frontal_image())
+    GUI.showLeftImage(HAL.get_ventral_image())
