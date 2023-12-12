@@ -2,66 +2,58 @@ from GUI import GUI
 from HAL import HAL
 import cv2
 import math
-import rospy
 
-# Constantes
-FACES_TO_DETECT = 6
-HEIGHT = 4
-X_COORD = 35
-Y_COORD = 25
-MIN_EUCLIDEAN_DIST = 1.5
+# Constants
+VICTIMS_X = 30
+VICTIMS_Y = -40
+BOAT_X = 0
+BOAT_Y = 0
 
 # Variables
-detected_faces = []
-it = 0
+x_vel = 0.25
+angle = 0.6
+iterations = 0
+spiral_iterations = 300
+landing_margin = 0.07
 
-# Create a cascade classifier for face detection
-cascade_classifier = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+# Start
+x_pos, y_pos = HAL.get_position()[:2]
 
+# Takeoff
+HAL.takeoff(3)
 
-# Función para detectar caras
-def detect_faces():
-    global detected_faces  # Make sure to use the global variable
-    # Obtener la imagen de la cámara
-    image = cv2.imread("image.jpg")
+# Face Cascade Classifier
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-    # Detectar las caras en la imagen
-    faces = cascade_classifier.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+# Main loop
+while not((VICTIMS_X - 1 <= x_pos <= VICTIMS_X + 1) and
+          (VICTIMS_Y - 1 <= y_pos <= VICTIMS_Y + 1)):
 
-    # Limpiar la lista de caras detectadas antes de agregar nuevas caras
-    detected_faces.clear()
+    # Display images
+    frontal_image = HAL.get_frontal_image()
+    ventral_image = HAL.get_ventral_image()
+    GUI.showImage(frontal_image)
+    GUI.showLeftImage(ventral_image)
 
-    # Agregar las caras detectadas a la lista
-    for face in faces:
-        detected_faces.append(face)
+    # Update drone position
+    x_pos, y_pos = HAL.get_position()[:2]
 
-# Función para mover el robot en espiral
-def movement():
-    global it  # Make sure to use the global variable
-    # Calcular la coordenada X en la espiral
-    x_coord = math.pow(it, 0.2) * X_COORD
+    # Set command position
+    HAL.set_cmd_pos(VICTIMS_X, VICTIMS_Y, 3, angle)
 
-    # Calcular la coordenada Y en la espiral
-    y_coord = math.pow(it, 0.2) * Y_COORD
+    # Face detection in the frontal image
+    faces = face_cascade.detectMultiScale(cv2.cvtColor(frontal_image, cv2.COLOR_BGR2GRAY), scaleFactor=1.3, minNeighbors=5)
 
-    # Enviar los comandos al robot
-    HAL.set_cmd_vel(x_coord, y_coord, HEIGHT, math.pi)
+    # Process detected faces
+    for (fx, fy, fw, fh) in faces:
+        # Your logic for drone control based on detected faces goes here
+        # For example, you can calculate the distance and angle from the drone to the detected face
+        # Adjust the drone's position or velocity accordingly
+        pass  # Placeholder to ensure the loop is not empty
 
-    # Dormir el robot durante un tiempo
-    rospy.sleep(0.03)
-
-    # Aumentar el valor de it
-    it += 1
-
-# Bucle principal
+# Additional code for continuous image display
 while True:
-    # Detectar caras
-    detect_faces()
-
-    # Si se detectan dos caras
-    if len(detected_faces) == FACES_TO_DETECT:
-        # Mover el robot en espiral
-        movement()
-
-    # Dormir el robot durante un tiempo
-    rospy.sleep(0.25)  # Reduced the sleep duration for testing purposes
+    frontal_image = HAL.get_frontal_image()
+    ventral_image = HAL.get_ventral_image()
+    GUI.showImage(frontal_image)
+    GUI.showLeftImage(ventral_image)
